@@ -279,8 +279,8 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
 						#	max_tokens=1024 # ページ要約の出力トークン数制限
 						)
                     except Exception as e:
-                              	try:
-                                   resp = client.chat.completions.create(
+                                try:
+                                    resp = client.chat.completions.create(
 									model="meta-llama/llama-4-maverick:free",  # Openrouter Visionモデル
 								messages=[{"role": "user", "content": messages_content}],
 								temperature=0.01,
