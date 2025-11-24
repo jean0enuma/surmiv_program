@@ -226,8 +226,6 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
                 temperature=0.01,
                 #max_tokens=1024 # ページ要約の出力トークン数制限
             )
-            summary = resp.choices[0].message.content.strip()
-            page_summaries.append(f"## Page {i} Summary:\n{summary}")
         except Exception as e:
             time.sleep(1)  # APIレート制限を避ける
             try:
@@ -237,8 +235,6 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
 					temperature=0.01,
 					#max_tokens=1024 # ページ要約の出力トークン数制限
 				)
-                summary = resp.choices[0].message.content.strip()
-                page_summaries.append(f"## Page {i} Summary:\n{summary}")
             except Exception as e:
                 time.sleep(1)  # APIレート制限を避ける
                 try:
@@ -283,6 +279,8 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
                                 return None, None, f"Openrouter Vision APIエラーが発生しました ({i}ページ目): {msg}"
 
         
+        summary = resp.choices[0].message.content.strip()
+        page_summaries.append(f"## Page {i} Summary:\n{summary}")
         if not page_summaries:
             return None,None,None, "PDFから画像またはテキストが抽出できなかったか、全てのページが処理できませんでした。"
     time.sleep(3)
