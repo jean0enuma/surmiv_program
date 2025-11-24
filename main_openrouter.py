@@ -272,36 +272,34 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
                 except Exception as e:
                     time.sleep(1)  # APIレート制限を避ける
                     try:
-                        resp = client.chat.completions.create(
-						model="meta-llama/llama-4-maverick:free",  # Openrouter Visionモデル
-						messages=[{"role": "user", "content": messages_content}],
-						temperature=0.01,
-					#	max_tokens=1024 # ページ要約の出力トークン数制限
-				    )
-                    except Exception as e:
-                        client_groq=Groq(
-							api_key=GROQ_API_KEY,
-						)
-                        try:
-                            resp = client_groq.chat.completions.create(
-							model="meta-llama/llama-4-maverick-17b-128e-instruct",  # Groq Visionモデル
+                         resp = client.chat.completions.create(
+							model="x-ai/grok-4.1-fast:free",  # Openrouter Visionモデル
 							messages=[{"role": "user", "content": messages_content}],
 							temperature=0.01,
-							#max_tokens=1024 # ページ要約の出力トークン数制限
+						#	max_tokens=1024 # ページ要約の出力トークン数制限
+						)
+                    except Exception as e:
+                              	try:
+                                   resp = client.chat.completions.create(
+									model="meta-llama/llama-4-maverick:free",  # Openrouter Visionモデル
+								messages=[{"role": "user", "content": messages_content}],
+								temperature=0.01,
+							#	max_tokens=1024 # ページ要約の出力トークン数制限
 							)
-                        except Exception as e:
-                            try:
-                                resp = client_groq.chat.completions.create(
-                                model="meta-llama/llama-4-scout-17b-16e-instruct",  # Groq Visionモデル
-                                messages=[{"role": "user", "content": messages_content}],
-                                temperature=0.01,
-                                #max_tokens=1024 # ページ要約の出力トークン数制限
-                                )
-                            except Exception as e:
-                                msg = str(e)
-                                if _is_token_limit_error_message(msg):
-                                    return None, None, f"Openrouter Vision APIのトークン上限のため、{i}ページ目の要約に失敗しました。{msg}"
-                                return None, None, f"Openrouter Vision APIエラーが発生しました ({i}ページ目): {msg}"
+                                except Exception as e:
+                                    client_groq = Groq(api_key=GROQ_API_KEY,)
+                                    try:
+                                        resp = client_groq.chat.completions.create(
+                                            model="meta-llama/llama-4-maverick-17b-128e-instruct",  # Groq Visionモデル
+                                            messages=[{"role": "user", "content": messages_content}],
+                                            temperature=0.01,
+                                            #max_tokens=1024 # ページ要約の出力トークン数制限
+                                        )
+                                    except Exception as e:
+                                        msg = str(e)
+                                        if _is_token_limit_error_message(msg):
+                                            return None, None, f"Openrouter Vision APIのトークン上限のため、{i}ページ目の要約に失敗しました。{msg}"
+                                        return None, None, f"Openrouter Vision APIエラーが発生しました ({i}ページ目): {msg}"
 
         
         summary = resp.choices[0].message.content.strip()
@@ -316,7 +314,7 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
 	
     try:
         resp = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3.1:free",  # 統合には高性能なテキストモデルを使用
+            model="x-ai/grok-4.1-fast:free",  # 統合には高性能なテキストモデルを使用
             messages=[{"role": "user", "content": reduce_prompt}],
             temperature=0.1,
         )
@@ -330,14 +328,11 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
             )
         except Exception as e:
             try:
-                client_groq=Groq(
-					api_key=GROQ_API_KEY,
-				)
-                resp = client_groq.chat.completions.create(
-                    model="openai/gpt-oss-120b",
-                    messages=[{"role": "user", "content": reduce_prompt}],
-                    temperature=0.1,
-				)
+                resp = client.chat.completions.create(
+            			model="deepseek/deepseek-chat-v3.1:free",  # 統合には高性能なテキストモデルを使用
+            			messages=[{"role": "user", "content": reduce_prompt}],
+            			temperature=0.1,
+	)
             except Exception as e:
                 msg = str(e)
                 if _is_token_limit_error_message(msg):
