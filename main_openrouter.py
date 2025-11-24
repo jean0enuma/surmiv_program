@@ -128,6 +128,9 @@ def resolve_pdf_url(url: str) -> Optional[str]:
     if url.lower().endswith(".pdf"):
         return url
     try:
+        pass  # Add the intended code here
+    except Exception as e:
+        print(f"An error occurred: {e}")  # Handle the exception
         html = requests.get(url, timeout=20).text
     except Exception:
         return None
@@ -167,6 +170,9 @@ def extract_pages_data_from_pdf_bytes(raw: bytes, dpi: int = 200) -> List[Tuple[
                 
                 pages_data.append((img_bytes, text))
     except Exception as e:
+        print(f"An error occurred: {e}")
+        # Handle the exception or log the error
+        print(f"An error occurred: {e}")
         print(f"Error extracting pages data from PDF: {e}")
         return []
     return pages_data
@@ -197,12 +203,28 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
         messages_content = []
         messages_content.append({"type": "text", "text": f"論文の{i}/{len(pages_data)}ページ目です。"})
         if i==1:#タイトルを抽出
-            resp = client.chat.completions.create(
-                model="mistralai/mistral-small-3.2-24b-instruct:free",  # Openrouter Visionモデル
-				messages=[{"role": "user", "content": [{"type": "text", "text": "この論文のタイトルを教えてください。"},{"type": "image_url","image_url": {"url": f"data:image/png;base64,{base64.b64encode(img_bytes).decode('utf-8')}"}}]}],
-				temperature=0.01,
-				#max_tokens=1024 # ページ要約の出力トークン数制限
-			)
+            try:
+                resp = client.chat.completions.create(
+					model="mistralai/mistral-small-3.2-24b-instruct:free",  # Openrouter Visionモデル
+					messages=[{"role": "user", "content": [{"type": "text", "text": "この論文のタイトルを教えてください。"},{"type": "image_url","image_url": {"url": f"data:image/png;base64,{base64.b64encode(img_bytes).decode('utf-8')}"}}]}],
+					temperature=0.01,
+					#max_tokens=1024 # ページ要約の出力トークン数制限
+				)
+            except Exception as e:
+                try:
+                        resp = client.chat.completions.create(
+						model="meta-llama/llama-4-maverick:free",  # Openrouter Visionモデル
+						messages=[{"role": "user", "content": messages_content}],
+						temperature=0.01,
+					#	max_tokens=1024 # ページ要約の出力トークン数制限
+				    )
+                except Exception as e:
+                        resp = client_groq.chat.completions.create(
+						model="meta-llama/llama-4-scout-17b-16e-instruct",  # Groq Visionモデル
+						messages=[{"role": "user", "content": messages_content}],
+						temperature=0.01,
+						#max_tokens=1024 # ページ要約の出力トークン数制限
+						)
             title= resp.choices[0].message.content.strip()
         # 画像を追加
         messages_content.append({
