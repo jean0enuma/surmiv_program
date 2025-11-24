@@ -219,6 +219,9 @@ def summarize_pages_with_openrouter_vision(pages_data: List[Tuple[bytes, str]]) 
 					#	max_tokens=1024 # ページ要約の出力トークン数制限
 				    )
                 except Exception as e:
+                        client_groq = Groq(
+                            api_key=GROQ_API_KEY,
+                        )
                         resp = client_groq.chat.completions.create(
 						model="meta-llama/llama-4-scout-17b-16e-instruct",  # Groq Visionモデル
 					messages=[{"role": "user", "content": [{"type": "text", "text": "この論文のタイトルを教えてください。"},{"type": "image_url","image_url": {"url": f"data:image/png;base64,{base64.b64encode(img_bytes).decode('utf-8')}"}}]}],
